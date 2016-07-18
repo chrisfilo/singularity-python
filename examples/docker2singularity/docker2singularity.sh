@@ -99,6 +99,9 @@ creation_date=`echo ${creation_date} | cut -c1-10`
 new_container_name=$image_name-$creation_date.img
 $SUDOCMD singularity create -s $size $new_container_name
 $SUDOCMD docker export $container_id | $SUDOCMD singularity import $new_container_name
+# Bootstrap the image to set up scripts for environemnt setup
+$SUDOCMD singularity bootstrap $new_container_name
+
 $SUDOCMD docker inspect $container_id >> $TMPDIR/singularity.json
 sudo singularity copy $new_container_name $TMPDIR/singularity.json /
 
@@ -106,8 +109,6 @@ sudo singularity copy $new_container_name $TMPDIR/singularity.json /
 $SUDOCMD docker cp $container_id:/etc/group $TMPDIR/grouphost
 sort /etc/group $TMPDIR/grouphost | uniq -u > $TMPDIR/group
 $SUDOCMD singularity copy $new_container_name $TMPDIR/group /etc/group
-# Bootstrap the image to set up scripts for environemnt setup
-$SUDOCMD singularity bootstrap $new_container_name
 $SUDOCMD chmod a+rw -R $TMPDIR
 
 ################################################################################
